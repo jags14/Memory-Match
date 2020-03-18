@@ -1,31 +1,4 @@
-	/*	document.getElementsById('firstRowFirstElement').addEventListener('mouseover', hoverFunc);
-		document.getElementById('firstRowFirstElement').addEventListener('mouseout', mouseOutFunc);
-		function hoverFunc(){
-			document.getElementById('firstRowFirstElement').style.backgroundColor = 'orange';
-		}
-		function mouseOutFunc() {
-			// body...
-			document.getElementById('firstRowFirstElement').style.backgroundColor = 'blue';
-		} 
-
-
-
-let elements = document.getElementsByTagName('td');
-
-
-function hoverFunc(){
-
-	elements[0][0].target.style.backgroundColor = 'orange';
-		}
-function mouseOutFunc() {
-			// body...
-	document.getElementsByTagName('td').style.backgroundColor = 'blue';
-		}
-
-document.getElementsByTagName('td').addEventListener('mouseover', hoverFunc);
-document.getElementsByTagName('td').addEventListener('mouseout', mouseOutFunc); */
-
-// Global variables go here
+	// Global variables go here
 var interval ;
 var started = false;
 var clickedArray = [];
@@ -33,15 +6,110 @@ var time = 0;
 var ready = true;
 var numCompleted = 0;
 
-// functions call go here
+// function calls go here
 
 setUp();
 
 // Define functions here
+
+function randomAnswers(){
+	var answers = [1,1,2,2,3,3,4,4,5];
+	answers.sort(function(item){
+		return .5 - Math.random();
+	});
+	return answers;
+}
 
 function hide(cell){
 	cell.style.backgroundColor = 'blue';
 	cell.innerHTML = "";
 	cell.clicked = false;
 
+}
+
+function complete(cell){
+	numCompleted++;
+	cell.completed = true;
+	cell.style.backgroundColor = 'purple';
+}
+
+function reveal(cell){
+	cell.style.backgroundColor = 'red';
+	cell.innerHTML = cell.value;
+	cell.clicked = true;
+}
+
+function startTimer(){
+	if(started == false){
+		interval = setInterval(function(){
+			time++;
+			document.getElementById('timer').innerHTML = "The Time Elapsed: " + time + " seconds"; 
+		}, 1000);
+		started = true ;
+	}
+
+}
+
+function setUp(){
+	var grid = document.getElementsByTagName('td');
+	var answers = randomAnswers();
+
+	for(var i=0; i<grid.length; i++){
+		var cell = grid[i];
+		cell.completed = false;
+		cell.clicked = false;
+		cell.value = answers[i];
+		// Adding event listeners for mouse enter and mouse out.
+		cell.addEventListener('mouseenter', function(){
+			if(this.completed == false && this.clicked == false){
+				this.style.backgroundColor = 'orange';
+			}
+		});
+		cell.addEventListener('mouseleave', function(){
+			if(this.completed == false && this.clicked == false){
+				this.style.backgroundColor = 'blue';
+			}
+		});
+
+		// Add event listener for clicking the cells
+		cell.addEventListener('click', function(){
+			if(ready == false)
+				return;
+			startTimer();
+			if(this.completed == false && this.clicked == false){
+				clickedArray.push(this);
+				reveal(this);
+				
+			}
+			if(clickedArray.length == 2){
+				if(clickedArray[0].value == clickedArray[1].value){
+					
+					
+					complete(clickedArray[0]);
+					complete(clickedArray[1]);
+
+					clickedArray = []; // Empty clickedArray
+
+					if(numCompleted == 8){
+						alert("You won in " + time + " seconds");
+						clearInterval(interval);
+					}
+				}
+				else{
+					ready = false;
+					document.getElementById('gridTable').style.border = "5px solid red";
+					setTimeout(function(){
+						hide(clickedArray[0]);
+						hide(clickedArray[1]);
+						clickedArray = [];
+						ready = true;
+						document.getElementById('gridTable').style.border = "5px solid black";
+					}, 500);
+					
+				}
+
+			}
+		})
+
+	}
 }
